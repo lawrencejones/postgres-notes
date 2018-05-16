@@ -1,7 +1,10 @@
-source 'https://rubygems.org'
+# frozen_string_literal: true
 
-gem 'activerecord'
-gem 'pg', '~> 0.21.0'
-gem 'docker-api'
-gem 'pry'
-gem 'pry-byebug'
+source "https://rubygems.org"
+
+gem "activerecord"
+gem "pg", "~> 0.21.0"
+gem "rspec"
+gem "docker-api"
+gem "pry"
+gem "pry-byebug"
