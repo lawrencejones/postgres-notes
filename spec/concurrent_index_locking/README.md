@@ -19,7 +19,7 @@ allows us to take less restrictive locks. The point at which this happens is in
 lockmode = stmt->concurrent ? ShareUpdateExclusiveLock : ShareLock;
 ```
 
-## Nuances
+## What went wrong
 
 On the surface, this might imply concurrent index creation is unaffected by read
 and writes to the target table, but there are places in the concurrent index
@@ -52,6 +52,8 @@ Postgres transactions acquire Exclusive locks on their own virtualxid whenever
 they begin to observe or mutate database state. There is no obvious relationship
 between our index creation and the blocking statement, and yet the lock we've
 taken is incredibly specific to that particular query.
+
+## Why
 
 The reason this has occured is that concurrent index creation builds an index in
 several stages. We first create the system catalog entry for the index,
@@ -96,6 +98,28 @@ our invalid transactions, and lock on their virtualxid to wait until they have
 terminated before proceeding. This is why we saw our Share lock on the
 virtualxid, and why queries that target entirely different tables cause
 `lock_timeout`s for our index build.
+
+For a more concrete picture of what was occuring, the following is a stack trace
+from Postgres 9.4.15 when locked on creating the index:
+
+```
+#0  0x00007f7f9bfbae07 in semop () at ../sysdeps/unix/syscall-template.S:81
+#1  0x0000562fe7b42681 in PGSemaphoreLock ()
+#2  0x0000562fe7b9b685 in ProcSleep ()
+#3  0x0000562fe7b9693e in ?? ()
+#4  0x0000562fe7b97a4d in LockAcquireExtended ()
+#5  0x0000562fe7b9a56c in VirtualXactLock ()
+#6  0x0000562fe7a767bd in DefineIndex ()
+#7  0x0000562fe7bb18e4 in ?? ()
+#8  0x0000562fe7bb09ce in standard_ProcessUtility ()
+#9  0x0000562fe7bad9f4 in ?? ()
+#10 0x0000562fe7bae63e in ?? ()
+#11 0x0000562fe7baf234 in PortalRun ()
+#12 0x0000562fe7bacacb in PostgresMain ()
+#13 0x0000562fe796ef9b in ?? ()
+#14 0x0000562fe7b53b86 in PostmasterMain ()
+#15 0x0000562fe7970132 in main ()
+```
 
 ## Going forward
 
