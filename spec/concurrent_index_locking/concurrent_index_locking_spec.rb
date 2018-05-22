@@ -23,24 +23,6 @@ RSpec.describe "concurrent index locking" do
   let!(:conn_one_pid) { backend_pid(conn_one) }
   let!(:conn_two_pid) { backend_pid(conn_two) }
 
-  after do
-    create_connection.exec(<<~SQL)
-    select pg_terminate_backend(pid) from pg_stat_activity where pid != pg_backend_pid();
-    SQL
-  end
-
-  def backend_pid(conn)
-    conn.exec(<<~SQL).values[0][0]
-    select pg_backend_pid();
-    SQL
-  end
-
-  def virtualxid(conn)
-    conn.exec(<<~SQL).values[0][0]
-    select virtualxid from pg_locks where pid = pg_backend_pid() and locktype = 'virtualxid';
-    SQL
-  end
-
   describe "when creating index concurrently" do
     subject(:create_index) do
       conn_two.exec("set lock_timeout='1s'")
