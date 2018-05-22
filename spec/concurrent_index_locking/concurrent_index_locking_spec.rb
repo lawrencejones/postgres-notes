@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require "timeout"
-
 RSpec.describe "concurrent index locking" do
   before { create_connection.exec(<<~SQL) }
   drop table if exists flows;

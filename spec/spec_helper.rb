@@ -3,6 +3,7 @@
 require "pg"
 require "rspec"
 require "pry"
+require "timeout"
 
 def create_connection
   PG.connect(host: ENV["PGHOST"], port: ENV["PGPORT"], dbname: "postgres", user: "postgres")
