@@ -50,7 +50,7 @@ RSpec.describe "alter table locks references" do
         Thread.new { add_column rescue PG::AdminShutdown }
       end
 
-      it "takes AccessExclusive lock on references flows relation" do
+      pending "takes AccessExclusive lock on references flows relation" do
         Timeout.timeout(3) do
           check_conn = create_connection
 

@@ -4,9 +4,15 @@ require "pg"
 require "rspec"
 require "pry"
 require "timeout"
+require "json"
 
 def create_connection
-  PG.connect(host: ENV["PGHOST"], port: ENV["PGPORT"], dbname: "postgres", user: "postgres")
+  PG.connect(
+    host: ENV["PGHOST"],
+    port: ENV["PGPORT"],
+    dbname: ENV["PGDATABASE"] || "notes",
+    user: ENV["PGUSER"],
+  )
 end
 
 def backend_pid(conn)

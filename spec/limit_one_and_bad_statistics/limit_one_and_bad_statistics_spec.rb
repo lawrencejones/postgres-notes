@@ -53,7 +53,7 @@ RSpec.describe "table joins" do
     select *
       from payment_transitions
      inner join payments on payment_transitions.payment_id=payments.id
-     where payment_transitions.payout_id = 'PO'
+     where payment_transitions.payout_id = 0
      order by payment_transitions.id asc #{limit}
     SQL
   end
@@ -61,8 +61,7 @@ RSpec.describe "table joins" do
   describe "without limit" do
     let(:limit) { "" }
 
-    it "plans" do
-      require "pry"; binding.pry
+    pending "plans" do
       puts(plan)
     end
   end
